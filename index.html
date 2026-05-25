@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DFA Language Interpreter</title>
+  <style>
+    :root {
+      --base:      #1e1e2e;
+      --mantle:    #181825;
+      --crust:     #11111b;
+      --surface0:  #313244;
+      --surface1:  #45475a;
+      --overlay0:  #6c7086;
+      --overlay1:  #7f849c;
+      --text:      #cdd6f4;
+      --subtext:   #bac2de;
+      --blue:      #89b4fa;
+      --lavender:  #b4befe;
+      --green:     #a6e3a1;
+      --red:       #f38ba8;
+      --peach:     #fab387;
+      --yellow:    #f9e2af;
+      --mauve:     #cba6f7;
+      --teal:      #94e2d5;
+      --sky:       #89dceb;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--base);
+      color: var(--text);
+      font-family: 'Courier New', 'Consolas', monospace;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .panel-left { border-right: 1px solid var(--surface0); }
+
+    .panel-label {
+      padding: 8px 14px;
+      font-size: 0.7rem;
+      color: var(--overlay0);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--surface0);
+    }
+
+    #code-editor {
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #code-input {
+      flex: 1;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.88rem;
+      line-height: 1.75;
+      border: none;
+      outline: none;
+      padding: 14px;
+      resize: none;
+      min-height: 0;
+      tab-size: 4;
+    }
+    #code-input::placeholder { color: var(--overlay0); }
+
+    .test-section {
+      border-top: 1px solid var(--surface0);
+      padding: 10px 14px 0 14px;
+      flex-shrink: 0;
+    }
+    .test-section label {
+      display: block;
+      color: var(--overlay0);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    #test-input {
+      width: 100%;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      border: none;
+      border-top: 1px solid var(--surface0);
+      outline: none;
+      padding: 8px 0;
+      resize: none;
+      height: 62px;
+    }
+    #test-input::placeholder { color: var(--overlay0); }
+
+    .toolbar {
+      border-top: 1px solid var(--surface0);
+      padding: 10px 14px;
+      flex-shrink: 0;
+    }
+
+    #run-btn {
+      background: none;
+      color: var(--blue);
+      border: 1px solid var(--surface1);
+      border-radius: 3px;
+      padding: 5px 16px;
+      font-family: inherit;
+      font-size: 0.83rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    #run-btn:hover  { border-color: var(--blue); }
+    #run-btn:active { opacity: 0.7; }
+    #run-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .output-wrap {
+      flex: 1;
+      overflow: auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #output-panel {
+      flex: 1;
+      padding: 14px;
+      font-size: 0.87rem;
+      line-height: 1.6;
+    }
+
+    #output-placeholder {
+      color: var(--overlay0);
+      font-style: italic;
+    }
+
+    #diagram-panel {
+      border-top: 1px solid var(--surface0);
+      padding: 14px;
+      display: none;
+      flex-shrink: 0;
+    }
+    #diagram-panel img {
+      max-width: 100%;
+      border-radius: 4px;
+      background: #fff;
+      display: block;
+    }
+
+    /* ── Token / output classes — NO TOCAR ── */
+    .code-block {
+      background: var(--crust);
+      border: 1px solid var(--surface0);
+      border-radius: 6px;
+      padding: 14px 18px;
+      margin: 8px 0;
+      line-height: 2.1;
+      overflow-x: auto;
+      word-break: break-all;
+    }
+    .sim-block {
+      background: var(--crust);
+      border: 1px solid var(--surface0);
+      border-radius: 6px;
+      padding: 12px 18px;
+      margin: 8px 0;
+    }
+    #output-panel h2 {
+      color: var(--blue);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--surface0);
+      padding-bottom: 5px;
+      margin: 18px 0 8px 0;
+    }
+    #output-panel h2:first-child { margin-top: 0; }
+
+    .keyword     { color: var(--mauve); font-style: italic; font-weight: bold; }
+    .stateId     { color: var(--green); font-weight: bold; }
+    .transition  { color: var(--sky); }
+    .string      { color: var(--yellow); }
+    .assignation { color: var(--red); }
+    .comma       { color: var(--text); }
+    .semicolon   { color: var(--red); }
+    .braces      { color: var(--peach); }
+    .comment     { color: var(--overlay0); font-style: italic; }
+    .lex-error   {
+      color: var(--red);
+      background: rgba(243, 139, 168, 0.12);
+      border-radius: 3px;
+      padding: 0 4px;
+      outline: 1px solid rgba(243, 139, 168, 0.4);
+    }
+    .resultado-ok   { color: var(--green); font-weight: bold; }
+    .resultado-fail { color: var(--red);   font-weight: bold; }
+    .error-msg {
+      color: var(--red);
+      background: rgba(243, 139, 168, 0.08);
+      border-left: 3px solid var(--red);
+      padding: 5px 12px;
+      margin: 4px 0;
+      border-radius: 0 4px 4px 0;
+      font-size: 0.83rem;
+    }
+    #diagram-panel h2 {
+      color: var(--blue);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--surface0);
+      padding-bottom: 5px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="workspace">
+
+    <div class="panel panel-left">
+      <div class="panel-label">editor</div>
+
+      <div id="code-editor">
+        <textarea
+          id="code-input"
+          spellcheck="false"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          placeholder="Escribe tu descripcion DFA aqui..."
+        >// AFD: acepta cadenas que terminan en 'b'
+states: {q0, q1};
+alphabet: {'a', 'b'};
+start_state: {q0};
+final_state: {q1};
+transitions:
+    q0 -> {'a'} -> q0,
+    q0 -> {'b'} -> q1,
+    q1 -> {'a'} -> q0,
+    q1 -> {'b'} -> q1;
+check: {'ab', 'b', 'a', 'aba', 'abb'};</textarea>
+      </div>
+
+      <div class="test-section">
+        <label>cadenas adicionales</label>
+        <textarea
+          id="test-input"
+          spellcheck="false"
+          placeholder="ab&#10;ba&#10;abba"
+        ></textarea>
+      </div>
+
+      <div class="toolbar">
+        <button id="run-btn" onclick="run()">Ejecutar</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">resultado</div>
+
+      <div class="output-wrap">
+        <div id="output-panel">
+          <div id="output-placeholder">// El resultado aparecerá aquí</div>
+        </div>
+
+        <div id="diagram-panel">
+          <h2>Diagrama del Autómata</h2>
+          <img id="diagram-img" src="" alt="Diagrama del autómata">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const runBtn = document.getElementById('run-btn');
+    const output = document.getElementById('output-panel');
+    const diagramPanel = document.getElementById('diagram-panel');
+    const diagramImg   = document.getElementById('diagram-img');
+
+    document.getElementById('code-input').addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        run();
+      }
+    });
+
+    async function run() {
+      const code    = document.getElementById('code-input').value;
+      const testStr = document.getElementById('test-input').value;
+
+      runBtn.disabled     = true;
+      runBtn.textContent  = 'Procesando…';
+      output.innerHTML    = "<div style='color:var(--overlay0);font-style:italic;'>// Procesando...</div>";
+      diagramPanel.style.display = 'none';
+
+      try {
+        const response = await fetch('/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ input: code, test: testStr })
+        });
+
+        if (!response.ok) {
+          throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+        }
+
+        const data = await response.json();
+
+        output.innerHTML = data.resultado || "<div class='error-msg'>Respuesta vacía del servidor.</div>";
+
+        if (data.imagen && data.imagen.trim().length > 0) {
+          diagramImg.src             = 'data:image/png;base64,' + data.imagen;
+          diagramPanel.style.display = 'block';
+        } else {
+          diagramPanel.style.display = 'none';
+        }
+
+      } catch (err) {
+        output.innerHTML =
+          "<div class='error-msg'>Error al conectar con el servidor: "
+          + escapeHtml(err.message) + "</div>"
+          + "<div style='color:var(--overlay0);font-size:0.8rem;margin-top:8px;'>"
+          + "Asegúrate de que servlet.rkt está corriendo en el puerto 8000.</div>";
+      } finally {
+        runBtn.disabled    = false;
+        runBtn.textContent = 'Ejecutar';
+      }
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

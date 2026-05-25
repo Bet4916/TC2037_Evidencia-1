@@ -1,2 +1,0 @@
-﻿# TC2037_Evidencia-1
-Implementar: Los espacios y saltos de linea se econocen como domis en tokenizacion pero sintaxis no los reciba, agregar test como opcion de input y validar como campo en html, agregar texto de error en caso de que no se reconozca el lenguaje.
