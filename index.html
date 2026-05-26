@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DFA Language Interpreter</title>
   <style>
+    /* =====================================================================
+       Paleta: Catppuccin Mocha (igual que el resaltado del tokenizador)
+       ===================================================================== */
     :root {
       --base:      #1e1e2e;
       --mantle:    #181825;
@@ -38,6 +41,37 @@
       overflow: hidden;
     }
 
+    /* ---- Header ---- */
+    header {
+      background: var(--mantle);
+      border-bottom: 1px solid var(--surface0);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    header h1 {
+      color: var(--blue);
+      font-size: 0.95rem;
+      font-weight: normal;
+      letter-spacing: 0.02em;
+    }
+    header .team {
+      color: var(--overlay0);
+      font-size: 0.72rem;
+      margin-left: auto;
+    }
+    header .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      margin-right: 8px;
+    }
+    header .dot.off { background: var(--overlay0); }
+
+    /* ---- Layout principal: dos columnas ---- */
     .workspace {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -46,6 +80,7 @@
       min-height: 0;
     }
 
+    /* ---- Paneles ---- */
     .panel {
       display: flex;
       flex-direction: column;
@@ -54,16 +89,18 @@
     }
     .panel-left { border-right: 1px solid var(--surface0); }
 
-    .panel-label {
-      padding: 8px 14px;
+    .panel-title {
+      background: var(--mantle);
+      border-bottom: 1px solid var(--surface0);
+      padding: 7px 16px;
       font-size: 0.7rem;
-      color: var(--overlay0);
-      letter-spacing: 0.06em;
+      color: var(--overlay1);
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       flex-shrink: 0;
-      border-bottom: 1px solid var(--surface0);
     }
 
+    /* ---- Editor ---- */
     #code-editor {
       flex: 1;
       overflow: hidden;
@@ -74,70 +111,107 @@
 
     #code-input {
       flex: 1;
-      background: transparent;
+      background: var(--base);
       color: var(--text);
       font-family: inherit;
       font-size: 0.88rem;
       line-height: 1.75;
       border: none;
       outline: none;
-      padding: 14px;
+      padding: 16px 18px;
       resize: none;
       min-height: 0;
       tab-size: 4;
     }
     #code-input::placeholder { color: var(--overlay0); }
 
+    /* ---- Seccion de cadenas de prueba ---- */
     .test-section {
       border-top: 1px solid var(--surface0);
-      padding: 10px 14px 0 14px;
+      background: var(--mantle);
+      padding: 10px 16px 0 16px;
       flex-shrink: 0;
     }
     .test-section label {
-      display: block;
-      color: var(--overlay0);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--overlay1);
       font-size: 0.7rem;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+      margin-bottom: 7px;
+    }
+    .test-section label span.badge {
+      background: var(--surface0);
+      color: var(--subtext);
+      font-size: 0.65rem;
+      padding: 1px 6px;
+      border-radius: 10px;
+      text-transform: none;
+      letter-spacing: 0;
     }
     #test-input {
       width: 100%;
-      background: transparent;
+      background: var(--crust);
       color: var(--text);
       font-family: inherit;
       font-size: 0.85rem;
       line-height: 1.6;
-      border: none;
-      border-top: 1px solid var(--surface0);
+      border: 1px solid var(--surface0);
+      border-bottom: none;
+      border-radius: 4px 4px 0 0;
       outline: none;
-      padding: 8px 0;
+      padding: 8px 12px;
       resize: none;
-      height: 62px;
+      height: 68px;
+      transition: border-color 0.2s;
     }
+    #test-input:focus { border-color: var(--blue); }
     #test-input::placeholder { color: var(--overlay0); }
 
+    /* ---- Toolbar ---- */
     .toolbar {
+      background: var(--mantle);
       border-top: 1px solid var(--surface0);
-      padding: 10px 14px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       flex-shrink: 0;
     }
 
     #run-btn {
-      background: none;
-      color: var(--blue);
-      border: 1px solid var(--surface1);
-      border-radius: 3px;
-      padding: 5px 16px;
+      background: var(--blue);
+      color: var(--crust);
+      border: none;
+      border-radius: 4px;
+      padding: 7px 22px;
       font-family: inherit;
-      font-size: 0.83rem;
+      font-size: 0.85rem;
+      font-weight: bold;
       cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
+      letter-spacing: 0.02em;
+      transition: opacity 0.15s, transform 0.1s;
     }
-    #run-btn:hover  { border-color: var(--blue); }
-    #run-btn:active { opacity: 0.7; }
-    #run-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    #run-btn:hover  { opacity: 0.88; }
+    #run-btn:active { transform: scale(0.97); }
+    #run-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
+    .kbd-hint {
+      color: var(--overlay0);
+      font-size: 0.72rem;
+    }
+    kbd {
+      background: var(--surface0);
+      color: var(--subtext);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 0.7rem;
+    }
+
+    /* ---- Panel de salida ---- */
     .output-wrap {
       flex: 1;
       overflow: auto;
@@ -148,7 +222,7 @@
 
     #output-panel {
       flex: 1;
-      padding: 14px;
+      padding: 16px 18px;
       font-size: 0.87rem;
       line-height: 1.6;
     }
@@ -156,22 +230,28 @@
     #output-placeholder {
       color: var(--overlay0);
       font-style: italic;
+      padding: 8px 0;
     }
 
     #diagram-panel {
       border-top: 1px solid var(--surface0);
-      padding: 14px;
+      padding: 14px 18px;
       display: none;
       flex-shrink: 0;
     }
     #diagram-panel img {
       max-width: 100%;
-      border-radius: 4px;
+      border-radius: 6px;
       background: #fff;
       display: block;
     }
 
-    /* ── Token / output classes — NO TOCAR ── */
+    /* =====================================================================
+       Clases CSS de tokens — deben coincidir exactamente con styler en
+       tokenizer.rkt y con html-generator.rkt (css-estilos).
+       ===================================================================== */
+
+    /* Bloques contenedores (generados por make-result-content) */
     .code-block {
       background: var(--crust);
       border: 1px solid var(--surface0);
@@ -189,6 +269,8 @@
       padding: 12px 18px;
       margin: 8px 0;
     }
+
+    /* Encabezados de seccion (inyectados via innerHTML por make-result-content) */
     #output-panel h2 {
       color: var(--blue);
       font-size: 0.75rem;
@@ -200,6 +282,7 @@
     }
     #output-panel h2:first-child { margin-top: 0; }
 
+    /* Clases de tokens (deben coincidir con el cond de styler) */
     .keyword     { color: var(--mauve); font-style: italic; font-weight: bold; }
     .stateId     { color: var(--green); font-weight: bold; }
     .transition  { color: var(--sky); }
@@ -216,8 +299,12 @@
       padding: 0 4px;
       outline: 1px solid rgba(243, 139, 168, 0.4);
     }
+
+    /* Resultados de simulacion */
     .resultado-ok   { color: var(--green); font-weight: bold; }
     .resultado-fail { color: var(--red);   font-weight: bold; }
+
+    /* Mensajes de error sintactico / lexico */
     .error-msg {
       color: var(--red);
       background: rgba(243, 139, 168, 0.08);
@@ -227,6 +314,8 @@
       border-radius: 0 4px 4px 0;
       font-size: 0.83rem;
     }
+
+    /* Encabezado del diagrama */
     #diagram-panel h2 {
       color: var(--blue);
       font-size: 0.75rem;
@@ -240,10 +329,26 @@
 </head>
 
 <body>
+  <!-- ================================================================
+       Header
+       ================================================================ -->
+  <header>
+    <span class="dot" id="status-dot"></span>
+    <h1>// DFA Language Interpreter</h1>
+    <span class="team">
+      Ivan Burrola &nbsp;·&nbsp; Alberto López &nbsp;·&nbsp;
+      Axel Lugo &nbsp;·&nbsp; Sebastian Viche
+    </span>
+  </header>
+
+  <!-- ================================================================
+       Workspace: editor (izquierda) | resultado (derecha)
+       ================================================================ -->
   <div class="workspace">
 
+    <!-- ---- Panel izquierdo: editor ---- -->
     <div class="panel panel-left">
-      <div class="panel-label">editor</div>
+      <div class="panel-title">Editor — DFA Language</div>
 
       <div id="code-editor">
         <textarea
@@ -266,8 +371,12 @@ transitions:
 check: {'ab', 'b', 'a', 'aba', 'abb'};</textarea>
       </div>
 
+      <!-- Cadenas de prueba adicionales -->
       <div class="test-section">
-        <label>cadenas adicionales</label>
+        <label>
+          Cadenas de prueba adicionales
+          <span class="badge">una por línea · sin comillas</span>
+        </label>
         <textarea
           id="test-input"
           spellcheck="false"
@@ -275,33 +384,42 @@ check: {'ab', 'b', 'a', 'aba', 'abb'};</textarea>
         ></textarea>
       </div>
 
+      <!-- Barra de acciones -->
       <div class="toolbar">
-        <button id="run-btn" onclick="run()">Ejecutar</button>
+        <button id="run-btn" onclick="run()">&#9654; Ejecutar</button>
+        <span class="kbd-hint"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
       </div>
     </div>
 
+    <!-- ---- Panel derecho: resultado ---- -->
     <div class="panel">
-      <div class="panel-label">resultado</div>
+      <div class="panel-title">Resultado</div>
 
       <div class="output-wrap">
         <div id="output-panel">
           <div id="output-placeholder">// El resultado aparecerá aquí</div>
         </div>
 
+        <!-- Diagrama del automata (visible solo si Graphviz esta disponible) -->
         <div id="diagram-panel">
-          <h2>Diagrama del Autómata</h2>
+          <h2>&#9654; Diagrama del Autómata</h2>
           <img id="diagram-img" src="" alt="Diagrama del autómata">
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ================================================================
+       JavaScript
+       ================================================================ -->
   <script>
+    const dot    = document.getElementById('status-dot');
     const runBtn = document.getElementById('run-btn');
     const output = document.getElementById('output-panel');
     const diagramPanel = document.getElementById('diagram-panel');
     const diagramImg   = document.getElementById('diagram-img');
 
+    // Ctrl+Enter ejecuta desde el editor
     document.getElementById('code-input').addEventListener('keydown', function(e) {
       if (e.ctrlKey && e.key === 'Enter') {
         e.preventDefault();
@@ -313,9 +431,11 @@ check: {'ab', 'b', 'a', 'aba', 'abb'};</textarea>
       const code    = document.getElementById('code-input').value;
       const testStr = document.getElementById('test-input').value;
 
-      runBtn.disabled     = true;
-      runBtn.textContent  = 'Procesando…';
-      output.innerHTML    = "<div style='color:var(--overlay0);font-style:italic;'>// Procesando...</div>";
+      // Estado: procesando
+      runBtn.disabled  = true;
+      runBtn.textContent = '⟳ Procesando…';
+      dot.className    = 'dot off';
+      output.innerHTML = "<div style='color:var(--overlay0);font-style:italic;'>// Procesando...</div>";
       diagramPanel.style.display = 'none';
 
       try {
@@ -331,27 +451,33 @@ check: {'ab', 'b', 'a', 'aba', 'abb'};</textarea>
 
         const data = await response.json();
 
+        // Insertar HTML del resultado
         output.innerHTML = data.resultado || "<div class='error-msg'>Respuesta vacía del servidor.</div>";
 
+        // Mostrar diagrama si se generó
         if (data.imagen && data.imagen.trim().length > 0) {
-          diagramImg.src             = 'data:image/png;base64,' + data.imagen;
+          diagramImg.src         = 'data:image/png;base64,' + data.imagen;
           diagramPanel.style.display = 'block';
         } else {
           diagramPanel.style.display = 'none';
         }
 
+        dot.className = 'dot'; // verde = OK
+
       } catch (err) {
         output.innerHTML =
-          "<div class='error-msg'>Error al conectar con el servidor: "
+          "<div class='error-msg'>&#9888; Error al conectar con el servidor: "
           + escapeHtml(err.message) + "</div>"
           + "<div style='color:var(--overlay0);font-size:0.8rem;margin-top:8px;'>"
           + "Asegúrate de que servlet.rkt está corriendo en el puerto 8000.</div>";
+        dot.className = 'dot off';
       } finally {
-        runBtn.disabled    = false;
-        runBtn.textContent = 'Ejecutar';
+        runBtn.disabled     = false;
+        runBtn.innerHTML    = '&#9654; Ejecutar';
       }
     }
 
+    // Escapar HTML para mensajes de error seguros
     function escapeHtml(str) {
       return str
         .replace(/&/g, '&amp;')
