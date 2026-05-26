@@ -1,18 +1,7 @@
 #lang racket
 
 ; html-generator.rkt
-; Genera la representacion HTML del resultado: codigo resaltado,
-; errores lexicos/sintacticos y resultados de simulacion.
-;
-; Patron central del esqueleto (maestra):
-;   (apply string-append (map styler token-stream))
-;
-; Provee dos variantes de salida:
-;   make-result-content -> contenido para el div del servlet (sin CSS)
-;   make-html-page      -> pagina HTML autonoma con CSS incluido
-;
 ; Autores: Ivan Burrola, Alberto Lopez, Axel Lugo, Sebastian Viche
-; Materia: Implementacion de metodos computacionales
 
 (require "tokenizer.rkt")
 
@@ -21,8 +10,7 @@
          make-html-page
          css-estilos)
 
-; -----------------------------------------------------------------------
-; css-estilos: string
+
 ; Estilos CSS para todos los tipos de lexema.
 ; Las clases deben coincidir exactamente con las que genera styler.
 (define css-estilos
@@ -61,15 +49,12 @@
   }
   ")
 
-; -----------------------------------------------------------------------
-; tokens->html-body: lista-tokens -> string
-; Patron del esqueleto: map styler sobre el stream, luego apply string-append.
+
 ; Es la operacion central de resaltado de sintaxis.
 (define (tokens->html-body token-stream)
   (apply string-append (map styler token-stream)))
 
-; -----------------------------------------------------------------------
-; errores->html: lista-strings -> string
+
 ; Convierte cada mensaje de error en un div con estilo.
 (define (errores->html errores)
   (apply string-append
@@ -77,8 +62,7 @@
                 (string-append "<div class='error-msg'>" e "</div>\n"))
               errores)))
 
-; -----------------------------------------------------------------------
-; resultados->html: lista de (cadena resultado) -> string
+
 ; Genera una linea por cada cadena simulada con su resultado y simbolo.
 (define (resultados->html resultados)
   (apply string-append
@@ -93,8 +77,7 @@
                    cadena clase icono resultado)))
               resultados)))
 
-; -----------------------------------------------------------------------
-; make-result-content: tokens errlex errsin resultados -> string
+
 ; Genera el contenido HTML para el div de salida del servlet.
 ; No incluye <html>, <head> ni CSS (eso va en index.html).
 (define (make-result-content token-stream errores-lex errores-sin resultados)
@@ -114,7 +97,6 @@
         "<h2>&#9654; Resultados de Simulacion</h2>"
         "<div class='sim-block'>" (resultados->html resultados) "</div>"))))
 
-; -----------------------------------------------------------------------
 ; make-html-page: tokens errlex errsin resultados imagen-b64 -> string
 ; Genera una pagina HTML completa y autonoma (con CSS incluido).
 (define (make-html-page token-stream errores-lex errores-sin resultados imagen-b64)
