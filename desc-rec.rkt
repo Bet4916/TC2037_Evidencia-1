@@ -126,6 +126,7 @@
 ; Parsea: 'start_state' ':' '{' state-id '}' ';'
 ; Guarda el estado inicial bajo la key "inicial".
 
+; Validacion semantica: el estado inicial debe haber sido declarado en states
 (define (parse-start toks auto errors)
   (match-let* ([(list t1 e1) (match-token "pr-startState"      toks errors)]
                [(list t2 e2) (match-token "assignation-dots"   t1   e1)]
@@ -134,14 +135,21 @@
                [(list t4 e4) (match-token "state-id"           t3   e3)]
                [(list t5 e5) (match-token "close-braces"       t4   e4)]
                [(list t6 e6) (match-token "terminator-semicol" t5   e5)])
+    (define e7
+      (if (hash-has-key? auto estado)
+          e6
+          (append e6
+                  (list (format "Error semantico: el estado inicial ~a no fue declarado en states"
+                                estado)))))
     (define new-auto (hash-set auto "inicial" estado))
-    (list t6 new-auto e6)))
+    (list t6 new-auto e7)))
 
 ; -----------------------------------------------------------------------
 ; parse-final: tokens auto errors -> (list tokens auto errors)
 ; Parsea: 'final_state' ':' '{' state-id (',' state-id)* '}' ';'
 ; Guarda la lista de estados finales bajo la key "finales".
 
+; Validacion semantica: cada estado final debe haber sido declarado en states
 (define (parse-final toks auto errors)
   (match-let* ([(list t1 e1)      (match-token "pr-finalState"      toks errors)]
                [(list t2 e2)      (match-token "assignation-dots"   t1   e1)]
@@ -149,8 +157,16 @@
                [(list t4 ids e4)  (parse-list  "state-id"           t3   e3)]
                [(list t5 e5)      (match-token "close-braces"       t4   e4)]
                [(list t6 e6)      (match-token "terminator-semicol" t5   e5)])
+    (define e7
+      (foldl (lambda (id errs)
+               (if (hash-has-key? auto id)
+                   errs
+                   (append errs
+                           (list (format "Error semantico: el estado final ~a no fue declarado en states"
+                                         id)))))
+             e6 ids))
     (define new-auto (hash-set auto "finales" ids))
-    (list t6 new-auto e6)))
+    (list t6 new-auto e7)))
 
 ; -----------------------------------------------------------------------
 ; parse-transition: tokens auto errors -> (list tokens auto errors)
