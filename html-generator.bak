@@ -117,6 +117,7 @@
 ; -----------------------------------------------------------------------
 ; make-html-page: tokens errlex errsin resultados imagen-b64 -> string
 ; Genera una pagina HTML completa y autonoma (con CSS incluido).
+; Util para generar un archivo .html de salida independiente.
 (define (make-html-page token-stream errores-lex errores-sin resultados imagen-b64)
   (string-append
    "<!DOCTYPE html>\n<html lang='es'>\n<head>\n"

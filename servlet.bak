@@ -12,7 +12,7 @@
 ;
 ; Si hay errores lexicos:    HTML con codigo resaltado + errores, sin continuar.
 ; Si hay errores sintacticos: HTML con codigo resaltado + errores, sin continuar.
-; Si todo bien :):                HTML con codigo + simulaciones + imagen base64.
+; Si todo OK:                HTML con codigo + simulaciones + imagen base64.
 ;
 ; Autores: Ivan Burrola, Alberto Lopez, Axel Lugo, Sebastian Viche
 ; Materia: Implementacion de metodos computacionales
@@ -43,7 +43,7 @@
 ;
 ; Devuelve:
 ;   resultado-html - fragmento HTML para inyectar en el div de salida
-;   imagen-b64     - imagen PNG del automata en base64, o "" si hay errores
+;   imagen-b64     - imagen PNG del automata en base64, o "" si falla/hay errores
 (define (process-input input test-str)
 
   ; 1. Tokenizar

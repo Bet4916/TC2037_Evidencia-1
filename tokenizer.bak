@@ -13,8 +13,7 @@
 ; state-id para evitar ambiguedades de prefijo.
 (define allRegex
   '(
-    ("newline"            #rx"^(\r\n|\n|\r)")
-    ("space"              #rx"^[ \t]+")
+    ("space"              #rx"^[ \t\n\r]+")
     ("pr-states"          #rx"^states")
     ("pr-alphabet"        #rx"^alphabet")
     ("pr-startState"      #rx"^start_state")
@@ -96,7 +95,7 @@
 ; Excluye los tokens de comentario. El parser los ignora; solo sirven
 ; para el resaltado de color en el HTML.
 (define (tokens-sin-comentarios tokens)
-  (filter (lambda (tok) (and (not (equal? (first tok) "comment")) (not (equal? (first tok) "newline"))))  tokens))
+  (filter (lambda (tok) (not (equal? (first tok) "comment"))) tokens))
 
 ; -----------------------------------------------------------------------
 ; styler: token -> string-HTML
@@ -126,12 +125,11 @@
       [(equal? label "separator-coma")
        (format "<span class='comma'>~a</span> " lexema)]
       [(equal? label "terminator-semicol")
-       (format "<span class='semicolon'>~a</span>" lexema)]
+       (format "<span class='semicolon'>~a</span><br>" lexema)]
       [(equal? label "comment")
-       (format "<span class='comment'>~a</span>" lexema)]
+       (format "<span class='comment'>~a</span><br>" lexema)]
       [(equal? label "operand-transition")
        (format "<span class='transition'>~a</span> " lexema)]
-      [(equal? label "newline") "<br>"]
       [(equal? label "open-braces")
        (format "<span class='braces'>~a</span> " lexema)]
       [(equal? label "close-braces")
