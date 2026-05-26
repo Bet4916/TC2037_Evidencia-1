@@ -1,26 +1,10 @@
 #lang racket
 
 ; desc-rec.rkt
-; Parser por descenso recursivo para el lenguaje de descripcion de DFAs.
-; Sigue el patron del esqueleto de la maestra (descenso-rec-completo).
-;
-; Cada funcion de parseado recibe (toks auto errors) y devuelve
-; (list toks auto errors), donde:
-;   toks   - tokens restantes por consumir
-;   auto   - hash del automata en construccion (crece con cada seccion)
-;   errors - lista de mensajes de error acumulados
-;
-; Las funciones base match-token y add-error se mantienen identicas
-; al esqueleto original de desc-rec.rkt.
-;
 ; Autores: Ivan Burrola, Alberto Lopez, Axel Lugo, Sebastian Viche
-; Materia: Implementacion de metodos computacionales
-
 (provide parse-automata)
 
-; -----------------------------------------------------------------------
 ; Funciones base del esqueleto original
-
 ; add-error: errors string tokens -> errors
 ; Agrega un mensaje de error a la lista.
 (define (add-error errors expected-label tokens)
@@ -31,8 +15,7 @@
             (list (format "Error sintactico: esperaba ~a, se recibio ~a"
                           expected-label token-recibido)))))
 
-; match-token: string tokens errors -> (list tokens errors)
-; Intenta consumir el token esperado del frente del stream.
+
 ; Si coincide avanza; si no, registra error y avanza de todas formas
 ; para permitir recuperacion y reportar mas errores.
 (define (match-token expected-label tokens errors)
@@ -44,9 +27,8 @@
     [else
      (list (rest tokens) (add-error errors expected-label tokens))]))
 
-; -----------------------------------------------------------------------
-; Funciones auxiliares
 
+; Funciones auxiliares
 ; current-label: tokens -> string
 (define (current-label toks)
   (if (empty? toks) "EOF" (caar toks)))
@@ -61,7 +43,6 @@
   (let ([result (regexp-match #rx"^'(.*)'$" s)])
     (if result (second result) s)))
 
-; -----------------------------------------------------------------------
 ; parse-list: string tokens errors -> (list tokens lista-lexemas errors)
 ; Parsea una lista de items del mismo tipo: item (',' item)*
 ; Devuelve la lista de lexemas encontrados (con comillas si es string).
@@ -90,8 +71,7 @@
                        errors)
       (list toks '() (add-error errors item-label toks))))
 
-; -----------------------------------------------------------------------
-; parse-states: tokens auto errors -> (list tokens auto errors)
+
 ; Parsea: 'states' ':' '{' state-id (',' state-id)* '}' ';'
 ; Agrega cada estado al hash auto con un hash de transiciones vacio.
 
@@ -106,8 +86,7 @@
       (foldl (lambda (id a) (hash-set a id (hash))) auto ids))
     (list t6 new-auto e6)))
 
-; -----------------------------------------------------------------------
-; parse-alphabet: tokens auto errors -> (list tokens auto errors)
+
 ; Parsea: 'alphabet' ':' '{' string (',' string)* '}' ';'
 ; Guarda el alfabeto como lista de simbolos sin comillas bajo "alfabeto".
 
@@ -121,8 +100,7 @@
     (define new-auto (hash-set auto "alfabeto" (map strip-quotes syms)))
     (list t6 new-auto e6)))
 
-; -----------------------------------------------------------------------
-; parse-start: tokens auto errors -> (list tokens auto errors)
+
 ; Parsea: 'start_state' ':' '{' state-id '}' ';'
 ; Guarda el estado inicial bajo la key "inicial".
 
@@ -144,8 +122,7 @@
     (define new-auto (hash-set auto "inicial" estado))
     (list t6 new-auto e7)))
 
-; -----------------------------------------------------------------------
-; parse-final: tokens auto errors -> (list tokens auto errors)
+
 ; Parsea: 'final_state' ':' '{' state-id (',' state-id)* '}' ';'
 ; Guarda la lista de estados finales bajo la key "finales".
 
@@ -168,8 +145,6 @@
     (define new-auto (hash-set auto "finales" ids))
     (list t6 new-auto e7)))
 
-; -----------------------------------------------------------------------
-; parse-transition: tokens auto errors -> (list tokens auto errors)
 ; Parsea una transicion individual:
 ;   state-id '->' '{' string (',' string)* '}' '->' state-id
 ; Para cada simbolo en la lista, registra la transicion origen->destino.
@@ -218,8 +193,7 @@
                [(list t5 e5)        (match-token "terminator-semicol" t4   e4)])
     (list t5 a4 e5)))
 
-; -----------------------------------------------------------------------
-; parse-check: tokens auto errors -> (list tokens auto errors)
+
 ; Parsea (opcionalmente): 'check' ':' '{' string (',' string)* '}' ';'
 ; Si no hay seccion check, devuelve el estado sin cambios ni error.
 
@@ -236,8 +210,7 @@
         (define new-auto (hash-set auto "check" strs))
         (list t6 new-auto e6))))
 
-; -----------------------------------------------------------------------
-; parse-automata: lista-tokens -> (list auto errors)
+
 ; Punto de entrada del parser. Recibe el stream de tokens ya filtrado
 ; (sin errores lexicos, sin comentarios) y construye el hash del automata.
 ; El hash resultante tiene la estructura:
