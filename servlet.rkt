@@ -1,21 +1,7 @@
 #lang racket
 
 ; servlet.rkt
-; Servidor web que expone el interprete del lenguaje DFA como una aplicacion HTTP.
-;
-; Sigue el patron del esqueleto servlet-imagen.rkt de la maestra:
-;   GET  /  -> sirve index.html
-;   POST /  -> recibe JSON {input, test}, retorna JSON {resultado, imagen}
-;
-; Pipeline de procesamiento:
-;   tokenize  ->  validar lex  ->  parse-automata  ->  simular  ->  genera-img
-;
-; Si hay errores lexicos:    HTML con codigo resaltado + errores, sin continuar.
-; Si hay errores sintacticos: HTML con codigo resaltado + errores, sin continuar.
-; Si todo bien :):                HTML con codigo + simulaciones + imagen base64.
-;
 ; Autores: Ivan Burrola, Alberto Lopez, Axel Lugo, Sebastian Viche
-; Materia: Implementacion de metodos computacionales
 
 (require web-server/servlet
          web-server/servlet-env
@@ -32,15 +18,11 @@
 (define-runtime-path here ".")
 
 
-; -----------------------------------------------------------------------
-; process-input: string string -> (values string string)
-;
+
 ; Ejecuta el pipeline completo sobre el texto del editor.
-;
 ; Parametros:
 ;   input    - contenido del textarea del editor (codigo DFA)
 ;   test-str - cadenas extra del campo de prueba en la UI (una por linea)
-;
 ; Devuelve:
 ;   resultado-html - fragmento HTML para inyectar en el div de salida
 ;   imagen-b64     - imagen PNG del automata en base64, o "" si hay errores
@@ -97,8 +79,6 @@
                 imagen)])]))
 
 
-; -----------------------------------------------------------------------
-; start: request -> response
 ; Dispatcher principal del servlet.
 (define (start req)
   (define method (request-method req))
@@ -168,7 +148,6 @@
       (list #"Metodo no permitido"))]))
 
 
-; -----------------------------------------------------------------------
 ; Arrancar el servidor
 ; #:servlet-regexp #rx"" hace que el servlet maneje TODAS las rutas
 (serve/servlet
