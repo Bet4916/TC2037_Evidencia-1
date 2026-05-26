@@ -1,13 +1,9 @@
 #lang racket
 
 ; draw-graph-modulo.rkt
-; Genera el diagrama de estados del automata a partir del hash del automata
-; construido por el descenso recursivo. Produce una imagen PNG codificada
-; en base64 para incrustarla en el HTML de salida.
-;
 ; Dependencia externa: Graphviz (comando 'dot') debe estar instalado.
 ; Autores: Ivan Burrola, Alberto Lopez, Axel Lugo, Sebastian Viche
-; Materia: Implementacion de metodos computacionales
+
 
 (require racket/system)
 (require racket/runtime-path)
@@ -20,8 +16,7 @@
 (current-directory here)
 
 
-; -----------------------------------------------------------------------
-; estado->dot-nodo : string lista-de-strings -> string
+
 ; Genera la declaracion DOT de un nodo (estado).
 ; Si el estado es final, se dibuja con doublecircle; si no, con circle.
 ;
@@ -37,11 +32,9 @@
    "  " estado " [shape=" forma "];\n"))
 
 
-; -----------------------------------------------------------------------
-; transicion->dot-arista : string string lista-de-simbolos -> string
+
 ; Genera una linea DOT para la arista entre dos estados,
 ; agrupando todos los simbolos que van del mismo origen al mismo destino.
-;
 ; Parametros:
 ;   origen   - estado de origen, ej. "q0"
 ;   destino  - estado de destino, ej. "q1"
@@ -53,11 +46,10 @@
    " [label=\"" etiqueta "\"];\n"))
 
 
-; -----------------------------------------------------------------------
+
 ; agrupar-por-destino : hash-de-transiciones -> lista de (destino . simbolos)
 ; Dado el hash de transiciones de UN estado (ej. (hash "a" "q1" "b" "q1")),
 ; agrupa los simbolos que van al mismo destino.
-;
 ; Devuelve lista de pares (destino lista-de-simbolos)
 (define (agrupar-por-destino trans-hash)
   (define pares (hash->list trans-hash))  ; lista de (simbolo . destino)
@@ -73,8 +65,6 @@
   (hash->list agrupado))  ; devuelve lista de (destino . lista-simbolos)
 
 
-; -----------------------------------------------------------------------
-; estado->dot-aristas : string hash -> string
 ; Genera todas las aristas DOT que salen de un estado dado.
 ;
 ; Parametros:
@@ -90,8 +80,7 @@
               grupos)))
 
 
-; -----------------------------------------------------------------------
-; auto-hash->estados : hash -> lista-de-strings
+
 ; Extrae solo las keys que son estados (excluye "inicial" y "finales")
 (define (auto-hash->estados auto)
   (filter (lambda (k)
@@ -102,11 +91,9 @@
           (hash-keys auto)))
 
 
-; -----------------------------------------------------------------------
-; genera-dot : hash -> string
+
 ; Genera el contenido completo del archivo .dot para Graphviz
 ; a partir del hash del automata construido por el parser.
-;
 ; Estructura esperada del hash:
 ;   (hash "q0" (hash "a" "q1")
 ;         "q1" (hash "b" "q2")
@@ -148,8 +135,6 @@
    "}\n"))
 
 
-; -----------------------------------------------------------------------
-; genera-img : hash -> string
 ; Genera la imagen PNG del automata y la devuelve codificada en base64.
 ; Si Graphviz no esta instalado, devuelve string vacio y muestra aviso.
 ;
